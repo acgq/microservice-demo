@@ -7,10 +7,13 @@ import com.github.licensingservice.config.ServiceConfig;
 import com.github.licensingservice.model.License;
 import com.github.licensingservice.model.Organization;
 import com.github.licensingservice.repository.LicenseRepository;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 @Service
@@ -31,7 +34,11 @@ public class LicenseService {
     //    @Autowired
     private OrganizationFeignClient feignClient;
 
+    @HystrixCommand(commandProperties = {
+            @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds",value = "10000")
+    })
     public License getLicense(String organizationId, String licenseId) {
+
         License license = licenseRepository.findByOrganizationIdAndLicenseId(organizationId, licenseId);
         return license.withComment(serviceConfig.getExampleProperty());
 //        return new License()
@@ -41,7 +48,25 @@ public class LicenseService {
 //                .withLicenseType("PerSeat");
     }
 
+    private void randomlyRunLong() {
+        Random random = new Random();
+        int randomNum = random.nextInt(3) + 1;
+        if (randomNum == 3) {
+            sleep();
+        }
+    }
+
+    private void sleep() {
+        try {
+            Thread.sleep(8000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @HystrixCommand()
     public List<License> getLicenseByOrganizationId(String organizationId) {
+        randomlyRunLong();
         List<License> licenses = licenseRepository.findByOrganizationId(organizationId);
         return licenses;
     }
