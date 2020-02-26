@@ -12,6 +12,7 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
@@ -35,10 +36,10 @@ public class LicenseService {
     private OrganizationFeignClient feignClient;
 
     @HystrixCommand(commandProperties = {
-            @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds",value = "10000")
+            @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "10000")
     })
     public License getLicense(String organizationId, String licenseId) {
-
+        randomlyRunLong();
         License license = licenseRepository.findByOrganizationIdAndLicenseId(organizationId, licenseId);
         return license.withComment(serviceConfig.getExampleProperty());
 //        return new License()
@@ -64,11 +65,21 @@ public class LicenseService {
         }
     }
 
-    @HystrixCommand()
+    @HystrixCommand(fallbackMethod = "buildFallbackLicenseList")
     public List<License> getLicenseByOrganizationId(String organizationId) {
         randomlyRunLong();
         List<License> licenses = licenseRepository.findByOrganizationId(organizationId);
         return licenses;
+    }
+
+    private List<License> buildFallbackLicenseList(String organizationId){
+        List<License> fallbackList=new ArrayList<>();
+        License license = new License()
+                .withId("0000-0000-000")
+                .withOrganizationId(organizationId)
+                .withProductName("no licensing information currently available");
+        fallbackList.add(license);
+        return fallbackList;
     }
 
     public void saveLicense(License license) {
