@@ -7,8 +7,11 @@ import com.github.licensingservice.config.ServiceConfig;
 import com.github.licensingservice.model.License;
 import com.github.licensingservice.model.Organization;
 import com.github.licensingservice.repository.LicenseRepository;
+import com.github.licensingservice.utils.UserContextHolder;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +22,7 @@ import java.util.UUID;
 
 @Service
 public class LicenseService {
+    private static Logger logger = LoggerFactory.getLogger(LicenseService.class);
     private LicenseRepository licenseRepository;
     private ServiceConfig serviceConfig;
     private OrganizationRestTemplateClient restTemplateClients;
@@ -65,15 +69,29 @@ public class LicenseService {
         }
     }
 
-    @HystrixCommand(fallbackMethod = "buildFallbackLicenseList")
+    //    @HystrixCommand(fallbackMethod = "buildFallbackLicenseList")
+    @HystrixCommand(threadPoolKey = "licenseByOrgThreadPool",
+            threadPoolProperties =
+                    {
+                            @HystrixProperty(name = "coreSize", value = "30"),
+                            @HystrixProperty(name = "maxQueueSize", value = "10")
+                    },
+            commandProperties = {
+                    @HystrixProperty(name = "circuitBreaker.requestVolumeThreshold", value = "10"),
+                    @HystrixProperty(name = "circuitBreaker.errorThresholdPercentage", value = "75"),
+                    @HystrixProperty(name = "circuitBreaker.sleepWindowInMilliseconds", value = "7000"),
+                    @HystrixProperty(name = "metrics.rollingStats.timeInMilliseconds", value = "15000"),
+                    @HystrixProperty(name = "metrics.rollingStats.numBuckets", value = "5")}
+    )
     public List<License> getLicenseByOrganizationId(String organizationId) {
+        logger.debug("LicenseService.getLicensesByOrg  Correlation id: {}", UserContextHolder.getContext().getCorrelationId());
         randomlyRunLong();
         List<License> licenses = licenseRepository.findByOrganizationId(organizationId);
         return licenses;
     }
 
-    private List<License> buildFallbackLicenseList(String organizationId){
-        List<License> fallbackList=new ArrayList<>();
+    private List<License> buildFallbackLicenseList(String organizationId) {
+        List<License> fallbackList = new ArrayList<>();
         License license = new License()
                 .withId("0000-0000-000")
                 .withOrganizationId(organizationId)
