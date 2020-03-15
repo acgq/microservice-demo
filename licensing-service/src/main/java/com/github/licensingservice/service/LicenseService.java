@@ -40,7 +40,7 @@ public class LicenseService {
     private OrganizationFeignClient feignClient;
 
     @HystrixCommand(commandProperties = {
-            @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "10000")
+            @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "1500")
     })
     public License getLicense(String organizationId, String licenseId) {
         randomlyRunLong();

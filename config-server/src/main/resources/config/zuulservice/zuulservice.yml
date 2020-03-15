@@ -1,0 +1,15 @@
+zuul:
+  prefix:  /api
+  ignored-services: '*'
+  routes:
+    licensestatic:
+      path: /licensestatic/**
+      uri: http://licenseservice-static:8081
+    organizationservice: /organization/**
+    licensingservice: /licensing/**
+# Setting logging levels
+logging:
+  level:
+    com.netlix: warn
+    com.springframwork.web: warn
+    com.github: debug

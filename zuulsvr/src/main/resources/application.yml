@@ -1,0 +1,35 @@
+server:
+  port: 5555
+
+  #Setting logging levels
+logging:
+    level:
+      com.netflix: WARN
+      org.springframework.web: WARN
+      com.github: debug
+
+eureka:
+  instance:
+    preferIpAddress: true
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+        defaultZone: http://localhost:8761/eureka/
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+#
+#zuul:
+#  prefix:  /api
+#  ignored-services: '*'
+#  routes:
+#    licensestatic:
+#      path: /licensestatic/**
+#      uri: http://licenseservice-static:8081
+#    organizationservice: /organization/**
+#    licensingservice: /licensing/**
+
