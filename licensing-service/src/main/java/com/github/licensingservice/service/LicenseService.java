@@ -36,7 +36,8 @@ public class LicenseService {
         this.discoveryClient = discoveryClient;
     }
 
-    //    @Autowired
+    //use feign client
+//    @Autowired
     private OrganizationFeignClient feignClient;
 
     @HystrixCommand(commandProperties = {
@@ -46,11 +47,6 @@ public class LicenseService {
         randomlyRunLong();
         License license = licenseRepository.findByOrganizationIdAndLicenseId(organizationId, licenseId);
         return license.withComment(serviceConfig.getExampleProperty());
-//        return new License()
-//                .withId(licenseId)
-//                .withOrganizationId(UUID.randomUUID().toString())
-//                .withProductName("Test product name")
-//                .withLicenseType("PerSeat");
     }
 
     private void randomlyRunLong() {

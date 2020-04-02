@@ -12,4 +12,4 @@ spring:
      config:
        server:
            native:
-              searchLocations: classpath:config/,,classpath:config/licensingservice,classpath:config/organizationservice,classpath:config/zuulservice,classpath:config/authenticationservice
+              searchLocations: classpath:config/,,classpath:config/licensingservice,classpath:config/organizationservice,classpath:config/zuulservice,classpath:config/authenticationservice,classpath:config/specialroutesservice

@@ -18,7 +18,7 @@ import java.util.Map;
 @RestController
 @EnableResourceServer
 @EnableEurekaClient
-public class Application {
+public class SecurityApplication {
 
     @GetMapping(value = "/user")
     public Map<String,Object> user(OAuth2Authentication user){
@@ -29,6 +29,6 @@ public class Application {
     }
 
     public static void main(String[] args) {
-        SpringApplication.run(Application.class,args);
+        SpringApplication.run(SecurityApplication.class,args);
     }
 }
